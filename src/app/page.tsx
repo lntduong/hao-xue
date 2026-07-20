@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Layers, MessageSquare, BookOpen, ChevronRight, Flame, Target, CalendarDays, Gamepad2, BrainCircuit, UploadCloud } from "lucide-react";
+import { Layers, MessageSquare, BookOpen, ChevronRight, Flame, Target, CalendarDays, Gamepad2, BrainCircuit, UploadCloud, Search } from "lucide-react";
 import { fetchSheetData, Flashcard } from "@/lib/api";
 import { Spinner } from "@heroui/react";
 
@@ -127,6 +127,16 @@ export default function Home() {
           <span className="text-orange-600 dark:text-orange-400 font-bold text-sm mt-1">{streak} Ngày</span>
         </div>
       </div>
+
+      {/* Dictionary Quick Search */}
+      <Link href="/dictionary" className="block">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-default-400" size={20} />
+          <div className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-[#1C1C1E] border border-default-200 dark:border-default-50/10 rounded-2xl flex items-center text-default-400 shadow-sm transition-all active:scale-95">
+            <span className="text-base font-medium">Tra cứu siêu từ điển...</span>
+          </div>
+        </div>
+      </Link>
 
       {/* Action required card */}
       <Link href="/vocab" className="block">
