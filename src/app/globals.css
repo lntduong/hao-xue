@@ -1,26 +1,47 @@
 @import "tailwindcss";
+@import "@heroui/styles";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F2F2F7;
+  --foreground: #000000;
+  --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--apple-font);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #000000;
+  --foreground: #FFFFFF;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* pinyin-pro ruby styles */
+.py-result-item {
+  display: inline-block;
+  margin-right: 2px;
+}
+ruby {
+  ruby-align: center;
+}
+rt.py-pinyin-item {
+  color: #007AFF;
+  font-size: 0.55em;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+.dark rt.py-pinyin-item {
+  color: #0A84FF;
+}
+.speaker-a-bubble rt.py-pinyin-item {
+  color: rgba(255, 255, 255, 0.85);
 }
