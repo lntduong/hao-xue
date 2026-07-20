@@ -10,7 +10,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--apple-font);
+  --font-sans: var(--font-be-vietnam), var(--apple-font);
 }
 
 .dark {
