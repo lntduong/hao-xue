@@ -6,6 +6,7 @@ import { Providers } from "./providers";
 export const metadata: Metadata = {
   title: "HaoXue - 好学",
   description: "Ứng dụng học tiếng Trung giao tiếp cá nhân HaoXue",
+  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
