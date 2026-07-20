@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Search, Sparkles, Volume2, Plus, BookmarkCheck, ArrowLeft } from "lucide-react";
 import { fetchSheetData, translateText, addSheetRow, Flashcard } from "@/lib/api";
 import { Spinner } from "@heroui/react";
-import { HanziAnimator } from "@/components/HanziAnimator";
+import HanziAnimator from "@/components/HanziAnimator";
 import { pinyin, match } from "pinyin-pro";
 import { playAudio } from "@/lib/audio";
 import Link from "next/link";
