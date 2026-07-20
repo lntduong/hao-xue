@@ -11,6 +11,10 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "HaoXue",
   },
+  icons: {
+    icon: '/icon.png',
+    apple: '/apple-icon.png',
+  }
 };
 
 export default function RootLayout({

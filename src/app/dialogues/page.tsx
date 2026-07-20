@@ -25,6 +25,51 @@ export default function DialoguesPage() {
   const [segmentedWords, setSegmentedWords] = useState<{ word: string, pinyin: string, meaning: string }[]>([]);
   const [isSegmenting, setIsSegmenting] = useState(false);
 
+  // Speech Recognition state
+  const [activeSpeechId, setActiveSpeechId] = useState<string | null>(null);
+  const [speechResult, setSpeechResult] = useState<{id: string, text: string, isCorrect: boolean | null} | null>(null);
+
+  const startListening = (targetWord: string, id: string) => {
+    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Trình duyệt của bạn không hỗ trợ chức năng này. Hãy thử dùng Google Chrome nhé!");
+      return;
+    }
+    
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'zh-CN';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    
+    recognition.onstart = () => {
+      setActiveSpeechId(id);
+      setSpeechResult(null);
+    };
+    
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      const cleanTranscript = transcript.replace(/[.,!?。，！？]/g, '').trim();
+      const cleanTarget = targetWord.replace(/[.,!?。，！？]/g, '').trim();
+      
+      setSpeechResult({
+        id,
+        text: cleanTranscript,
+        isCorrect: cleanTranscript === cleanTarget
+      });
+    };
+    
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error", event.error);
+      setActiveSpeechId(null);
+    };
+    
+    recognition.onend = () => {
+      setActiveSpeechId(null);
+    };
+    
+    recognition.start();
+  };
+
   const loadData = async () => {
     setLoading(true);
     const result = await fetchSheetData<Dialogue>("Dialogues");
@@ -171,15 +216,38 @@ export default function DialoguesPage() {
                                 dangerouslySetInnerHTML={{ __html: html(dlg.Hanzi) }} 
                               />
                             </div>
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); playAudio(dlg.Hanzi); }}
-                              className={`shrink-0 mt-0.5 w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
-                                isSpeakerA ? "bg-white/20 hover:bg-white/30 text-white" : "bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-default-600 dark:text-default-300"
-                              }`}
-                            >
-                              <Volume2 size={14} />
-                            </button>
+                            <div className="flex flex-col gap-1.5 shrink-0 mt-0.5">
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); playAudio(dlg.Hanzi); }}
+                                className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
+                                  isSpeakerA ? "bg-white/20 hover:bg-white/30 text-white" : "bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-default-600 dark:text-default-300"
+                                }`}
+                              >
+                                <Volume2 size={14} />
+                              </button>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); startListening(dlg.Hanzi, dlg.ID || idx.toString()); }}
+                                className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
+                                  activeSpeechId === (dlg.ID || idx.toString()) 
+                                    ? "bg-red-500 text-white animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]" 
+                                    : isSpeakerA ? "bg-white/20 hover:bg-white/30 text-white" : "bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-default-600 dark:text-default-300"
+                                }`}
+                                title="Kiểm tra phát âm"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                              </button>
+                            </div>
                           </div>
+                          
+                          {speechResult?.id === (dlg.ID || idx.toString()) && (
+                            <div className={`mt-2 text-[13px] font-medium px-2 py-1 rounded-md inline-block ${
+                              speechResult.isCorrect 
+                                ? (isSpeakerA ? "bg-white/20 text-white" : "bg-green-100 text-green-700")
+                                : (isSpeakerA ? "bg-red-500/50 text-white" : "bg-red-100 text-red-700")
+                            }`}>
+                              {speechResult.isCorrect ? "✅ " : "❌ "}{speechResult.text}
+                            </div>
+                          )}
                           
                           <p className={`text-[13.5px] mt-2 border-t pt-2 font-medium ${
                             isSpeakerA ? "border-white/20 text-white/90" : "border-default-200 dark:border-default-50/10 text-default-600 dark:text-default-400"

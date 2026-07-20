@@ -21,6 +21,50 @@ export default function VocabPage() {
   const [sessionTotalCount, setSessionTotalCount] = useState(0);
 
   const [isFlipped, setIsFlipped] = useState(false);
+  
+  // Speech Recognition State
+  const [isListening, setIsListening] = useState(false);
+  const [speechResult, setSpeechResult] = useState<{text: string, isCorrect: boolean | null}>({text: "", isCorrect: null});
+
+  const startListening = (targetWord: string) => {
+    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Trình duyệt của bạn không hỗ trợ chức năng này. Hãy thử dùng Google Chrome nhé!");
+      return;
+    }
+    
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'zh-CN';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    
+    recognition.onstart = () => {
+      setIsListening(true);
+      setSpeechResult({text: "", isCorrect: null});
+    };
+    
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      const cleanTranscript = transcript.replace(/[.,!?。，！？]/g, '').trim();
+      const cleanTarget = targetWord.replace(/[.,!?。，！？]/g, '').trim();
+      
+      setSpeechResult({
+        text: cleanTranscript,
+        isCorrect: cleanTranscript === cleanTarget
+      });
+    };
+    
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error", event.error);
+      setIsListening(false);
+    };
+    
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+    
+    recognition.start();
+  };
   const [updating, setUpdating] = useState(false);
   
   // Search state
@@ -409,6 +453,27 @@ export default function VocabPage() {
                   <p className="text-[10px] text-default-400 uppercase tracking-wider mb-1 font-semibold">Thanh</p>
                   <p className="font-medium text-lg text-foreground">{pinyin(card.Hanzi, { pattern: 'num' }) || '-'}</p>
                 </div>
+              </div>
+
+              {/* Luyện Phát Âm (Speech Recognition) */}
+              <div className="mt-4 w-full flex flex-col items-center">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    startListening(card.Hanzi);
+                  }}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                    isListening ? "bg-red-500 text-white animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]" : "bg-[#007AFF]/10 text-[#007AFF] hover:bg-[#007AFF]/20"
+                  }`}
+                  title="Kiểm tra phát âm"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                </button>
+                {speechResult.text && (
+                  <div className={`mt-2 text-sm font-medium px-3 py-1 rounded-full ${speechResult.isCorrect ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                    {speechResult.isCorrect ? "✅ " : "❌ "}{speechResult.text}
+                  </div>
+                )}
               </div>
             </div>
           </div>
