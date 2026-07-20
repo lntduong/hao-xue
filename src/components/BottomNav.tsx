@@ -2,17 +2,17 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Home, Layers, MessageSquare, BookOpen, Gamepad2 } from "lucide-react";
+import { Home, Layers, MessageSquare, BookOpen, Map } from "lucide-react";
 
 export function BottomNav() {
   const pathname = usePathname();
 
   const navItems = [
     { name: "Tổng quan", href: "/", icon: Home },
+    { name: "Lộ trình", href: "/path", icon: Map },
     { name: "Từ vựng", href: "/vocab", icon: Layers },
     { name: "Hội thoại", href: "/dialogues", icon: MessageSquare },
     { name: "Ngữ pháp", href: "/grammar", icon: BookOpen },
-    { name: "Trò chơi", href: "/games", icon: Gamepad2 },
   ];
 
   return (

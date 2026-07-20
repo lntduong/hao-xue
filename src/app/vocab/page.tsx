@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { fetchSheetData, updateFlashcardReview, addSheetRow, translateText, Flashcard } from "@/lib/api";
 import { Spinner } from "@heroui/react";
 import { playAudio } from "@/lib/audio";
@@ -9,9 +10,20 @@ import { pinyin, match } from "pinyin-pro";
 import HanziAnimator from "@/components/HanziAnimator";
 
 export default function VocabPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center mt-20"><Spinner /></div>}>
+      <VocabContent />
+    </Suspense>
+  );
+}
+
+function VocabContent() {
   const [data, setData] = useState<Flashcard[]>([]);
   const [dueCards, setDueCards] = useState<Flashcard[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  const searchParams = useSearchParams();
+  const nodeParam = searchParams?.get("node");
   
   // Session State
   const [sessionLevel, setSessionLevel] = useState("Tất cả");
@@ -82,24 +94,42 @@ export default function VocabPage() {
   const loadData = async () => {
     setLoading(true);
     const result = await fetchSheetData<Flashcard>("Vocab");
-    setData(result);
+    const validData = result.filter(card => card.Hanzi && card.Meaning);
+    setData(validData);
     
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    if (nodeParam !== null && !isNaN(Number(nodeParam))) {
+      const nodeIndex = parseInt(nodeParam, 10);
+      const start = nodeIndex * 10;
+      const nodeCards = validData.slice(start, start + 10);
+      
+      setDueCards(nodeCards);
+      
+      // Auto start session for this node
+      if (nodeCards.length > 0) {
+        setSessionCards(nodeCards);
+        setSessionTotalCount(nodeCards.length);
+        setIsSessionActive(true);
+        setIsFlipped(false);
+      }
+    } else {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const due = validData.filter(card => {
+        if (!card.Next_Review_Date) return true;
+        const reviewDate = new Date(card.Next_Review_Date);
+        return reviewDate <= today;
+      });
+      
+      setDueCards(due);
+    }
     
-    const due = result.filter(card => {
-      if (!card.Next_Review_Date) return true;
-      const reviewDate = new Date(card.Next_Review_Date);
-      return reviewDate <= today;
-    });
-    
-    setDueCards(due);
     setLoading(false);
   };
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [nodeParam]);
 
   const startSession = () => {
     let filtered = dueCards;
