@@ -27,7 +27,7 @@ export default function VocabPage() {
   const [speechResult, setSpeechResult] = useState<{text: string, isCorrect: boolean | null}>({text: "", isCorrect: null});
 
   const startListening = (targetWord: string) => {
-    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert("Trình duyệt của bạn không hỗ trợ chức năng này. Hãy thử dùng Google Chrome nhé!");
       return;

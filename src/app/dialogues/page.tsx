@@ -30,7 +30,7 @@ export default function DialoguesPage() {
   const [speechResult, setSpeechResult] = useState<{id: string, text: string, isCorrect: boolean | null} | null>(null);
 
   const startListening = (targetWord: string, id: string) => {
-    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert("Trình duyệt của bạn không hỗ trợ chức năng này. Hãy thử dùng Google Chrome nhé!");
       return;
@@ -226,9 +226,9 @@ export default function DialoguesPage() {
                                 <Volume2 size={14} />
                               </button>
                               <button 
-                                onClick={(e) => { e.stopPropagation(); startListening(dlg.Hanzi, dlg.ID || idx.toString()); }}
+                                onClick={(e) => { e.stopPropagation(); startListening(dlg.Hanzi, String(dlg.ID || idx)); }}
                                 className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
-                                  activeSpeechId === (dlg.ID || idx.toString()) 
+                                  activeSpeechId === String(dlg.ID || idx)
                                     ? "bg-red-500 text-white animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]" 
                                     : isSpeakerA ? "bg-white/20 hover:bg-white/30 text-white" : "bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-default-600 dark:text-default-300"
                                 }`}
@@ -239,7 +239,7 @@ export default function DialoguesPage() {
                             </div>
                           </div>
                           
-                          {speechResult?.id === (dlg.ID || idx.toString()) && (
+                          {speechResult?.id === String(dlg.ID || idx) && (
                             <div className={`mt-2 text-[13px] font-medium px-2 py-1 rounded-md inline-block ${
                               speechResult.isCorrect 
                                 ? (isSpeakerA ? "bg-white/20 text-white" : "bg-green-100 text-green-700")
